@@ -13,7 +13,7 @@ module.exports = function(minified) {
     }
 
     function toggleServer() {
-        if (this.get() == "openweather") {
+        if (this.get() == "openweathermap") {
             clayConfig.getItemByMessageKey('openweathermap_api_key').show();
         } else {
             clayConfig.getItemByMessageKey('openweathermap_api_key').hide();

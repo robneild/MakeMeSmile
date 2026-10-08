@@ -43,15 +43,11 @@ module.exports = [
         "type": "radiogroup",
         "messageKey": "server",
         "label": "Weather service to use",
-        "defaultValue": "yahoo",
+        "defaultValue": "openweathermap",
         "options": [
           {
-            "label": "YahooWeather",
-            "value": "yahoo"
-          },
-          {
             "label": "OpenWeatherMap",
-            "value": "openweather"
+            "value": "openweathermap"
           }
         ]
       },
