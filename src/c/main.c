@@ -1,6 +1,6 @@
 #include <pebble.h>
 #include <ctype.h>
-  
+
 #include "pebble_process_info.h"
 #include "weather_images.h"
 #include "graphics_simple.h"
@@ -19,7 +19,7 @@ extern const PebbleProcessInfo __pbl_app_info;
 #define KEY_MMS_HOUR_LEAD_ZERO 9
 #define KEY_MMS_HUMIDITY 10
 #define KEY_MMS_SHOW_HUMIDITY 11
-  
+
 static Window *s_main_window;
 static TextLayer *s_time_layer;
 static TextLayer *s_bottom_info_layer;
@@ -27,7 +27,7 @@ static TextLayer *s_bottom_info_layer;
 #ifdef PBL_ROUND
   static TextLayer *s_temperature_layer;
 #endif
-  
+
 static Layer *s_weather_image_layer;
 
 static Layer *s_bluetooth_layer;
@@ -108,21 +108,21 @@ static void update_time(struct tm *tick_time) {
       strftime(s_time_buffer, sizeof(s_time_buffer), "%l:%M", tick_time);
     }
   }
-  
+
   if (strncmp(s_time_buffer, " ", 1) == 0) {
     clock_copy_time_string(s_time_buffer, sizeof("0:00"));
   }
   // Display this time on the TextLayer
   text_layer_set_text(s_time_layer, s_time_buffer);
-  
+
   static bool update_bottom_info = false;
   if (0 == strlen(s_date_buffer) || (tick_time->tm_min==0 && tick_time->tm_sec==0)) {
     static char bufferDayNum[] = "01";
     strftime(bufferDayNum, sizeof(bufferDayNum), "%e", tick_time);
-    
+
     static char bufferMonth[32];
     strftime(bufferMonth, sizeof(bufferMonth), "%b", tick_time);
-    
+
     if (strncmp(bufferDayNum, " ", 1) == 0) {
       snprintf(s_date_buffer, sizeof(s_date_buffer), "%s%s", bufferMonth, bufferDayNum);
     }
@@ -131,16 +131,16 @@ static void update_time(struct tm *tick_time) {
     }
     update_bottom_info = true;
   }
-  
+
   if (0 == strlen(s_day_of_week_buffer) || (tick_time->tm_min==0 && tick_time->tm_sec==0)) {
     strftime(s_day_of_week_buffer, sizeof(s_day_of_week_buffer), "%a", tick_time);
     update_bottom_info = true;
   }
-  
+
   if (update_bottom_info) {
     set_bottom_info();
   }
-  
+
   if (last_beeped!=tick_time->tm_hour
       && !is_silence(tick_time->tm_hour)
       && strcmp(s_config_hourly_beep, "beep")==0
@@ -156,25 +156,25 @@ static void main_window_load(Window *window) {
   persist_read_and_set();
   APP_LOG(APP_LOG_LEVEL_INFO, "Make Me Smile version %d.%d",
           (int)(get_current_version()/10), get_current_version()%10);
-  
+
   int pbl_round_correction = 0;
   int no_leco_correction = 0;
   GRect window_bounds = layer_get_bounds(window_get_root_layer(window));
-  
+
   if (228 == window_bounds.size.h) {
     LAYER_VERTICAL_INDENT = 44;
   }
-  
+
   // Create bottom background Layer
   s_background_layer = layer_create(window_bounds);
   layer_set_update_proc(s_background_layer, draw_background);
   layer_add_child(window_get_root_layer(window), s_background_layer);
-  
+
   // Create weather image layer
   s_weather_image_layer = layer_create(GRect(0, 7, window_bounds.size.w, 101+LAYER_VERTICAL_INDENT));
   layer_set_update_proc(s_weather_image_layer, update_weather_image);
   layer_add_child(window_get_root_layer(window), s_weather_image_layer);
-  
+
   // Create time TextLayer
   #ifndef FONT_KEY_LECO_38_BOLD_NUMBERS
   no_leco_correction = 4;
@@ -195,7 +195,7 @@ static void main_window_load(Window *window) {
   #endif
   // Add it as a child layer to the Window's root layer
   layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_time_layer));
-  
+
   // Create bottom info Layer
   #ifdef PBL_ROUND
     pbl_round_correction = -6;
@@ -211,7 +211,7 @@ static void main_window_load(Window *window) {
     text_layer_set_font(s_bottom_info_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
   }
   layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_bottom_info_layer));
-  
+
   #ifdef PBL_ROUND
     s_temperature_layer = text_layer_create(GRect(72, 151, 50, 30));
     text_layer_set_background_color(s_temperature_layer, GColorClear);
@@ -220,7 +220,7 @@ static void main_window_load(Window *window) {
     text_layer_set_font(s_temperature_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
     layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_temperature_layer));
   #endif
-  
+
   // Handle current bluetooth connection state
   #ifdef PBL_ROUND
   s_bluetooth_layer = layer_create(GRect(12, 110, 20, 20));
@@ -229,9 +229,9 @@ static void main_window_load(Window *window) {
   #endif
   layer_set_update_proc(s_bluetooth_layer, bluetooth_layer_update);
   layer_add_child(window_get_root_layer(window), s_bluetooth_layer);
-  
+
   bluetooth_handler(bluetooth_connection_service_peek());
-  
+
   // Pebble Battery
   BatteryChargeState initial = battery_state_service_peek();
   battery_level = initial.charge_percent;
@@ -244,18 +244,18 @@ static void main_window_load(Window *window) {
   #endif
   layer_set_update_proc(s_battery_layer, battery_layer_update_callback);
   layer_add_child(window_get_root_layer(window), s_battery_layer);
-  
+
   battery_handler();
 }
 
 static void main_window_unload(Window *window) {
   // Destroy TextLayer
   text_layer_destroy(s_time_layer);
-  
+
   #ifdef PBL_ROUND
     text_layer_destroy(s_temperature_layer);
   #endif
-  
+
   // Destroy date elements
   text_layer_destroy(s_bottom_info_layer);
 
@@ -264,7 +264,7 @@ static void main_window_unload(Window *window) {
   layer_destroy(s_weather_image_layer);
   layer_destroy(s_bluetooth_layer);
   layer_destroy(s_battery_layer);
-  
+
   tick_timer_service_unsubscribe();
   battery_state_service_unsubscribe();
   bluetooth_connection_service_unsubscribe();
@@ -272,7 +272,7 @@ static void main_window_unload(Window *window) {
 
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
   update_time(tick_time);
-  
+
   // Get weather update every 30 minutes
   if(tick_time->tm_min % 30 == 0 || (weather_out_of_date && tick_time->tm_min % 2 == 0)) {
     update_weather();
@@ -295,21 +295,22 @@ static void update_weather() {
 }
 
 static void inbox_received_callback(DictionaryIterator *iterator, void *context) {
+  APP_LOG(APP_LOG_LEVEL_INFO, "inbox_received_callback");
   static bool update_bottom_info = false;
-  
+
   Tuple *temperature_tuple = dict_find(iterator, MESSAGE_KEY_TEMPERATURE);
   if (temperature_tuple) {
-    snprintf(s_temperature_buffer, sizeof(s_temperature_buffer), "%s", temperature_tuple->value->cstring);
-    persist_write_string(KEY_MMS_TEMPERATURE, s_temperature_buffer);
-    update_bottom_info = true;
+        snprintf(s_temperature_buffer, sizeof(s_temperature_buffer), "%s", temperature_tuple->value->cstring);
+        persist_write_string(KEY_MMS_TEMPERATURE, s_temperature_buffer);
+        update_bottom_info = true;
   }
-  
+
   Tuple *conditions_tuple = dict_find(iterator, MESSAGE_KEY_CONDITIONS);
   if (conditions_tuple) {
     persist_write_int(KEY_MMS_CONDITIONS, (int)conditions_tuple->value->int32);
     layer_mark_dirty(s_weather_image_layer);
   }
-  
+
   Tuple *bluetooth_tuple = dict_find(iterator, MESSAGE_KEY_BLUETOOTH);
   if (bluetooth_tuple) {
     snprintf(s_config_bluetooth, sizeof(s_config_bluetooth), "%s", bluetooth_tuple->value->cstring);
@@ -318,10 +319,10 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
     bluetooth_handler(bluetooth_connection_service_peek());
     update_weather();
   }
-  
+
   Tuple *battery_tuple = dict_find(iterator, MESSAGE_KEY_BATTERY);
   if (battery_tuple) {
-    if (battery_tuple->value->uint8 != 0) {
+    if (battery_tuple->value->int32 != 0) {
       snprintf(s_config_battery, sizeof(s_config_battery), "battery_always");
     }
     else {
@@ -330,17 +331,18 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
     persist_write_string(KEY_MMS_BATTERY, s_config_battery);
     battery_handler();
   }
-  
+
   Tuple *screen_color_tuple = dict_find(iterator, MESSAGE_KEY_SCREEN_COLOR);
   if (screen_color_tuple) {
     snprintf(s_config_screen_color, sizeof(s_config_screen_color), "%s", screen_color_tuple->value->cstring);
+    APP_LOG(APP_LOG_LEVEL_INFO, "ROB: got colr %s", s_config_screen_color);
     persist_write_string(KEY_MMS_SCREEN_COLOR, s_config_screen_color);
     update_layers_color();
   }
-  
+
   Tuple *hourly_beep_tuple = dict_find(iterator, MESSAGE_KEY_HOURLY_BEEP);
   if (hourly_beep_tuple) {
-    if (hourly_beep_tuple->value->uint8 != 0) {
+    if (hourly_beep_tuple->value->int32 != 0) {
       snprintf(s_config_hourly_beep, sizeof(s_config_hourly_beep), "beep");
     }
     else {
@@ -348,19 +350,19 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
     }
     persist_write_string(KEY_MMS_HOURLY_BEEP, s_config_hourly_beep);
   }
-  
+
   Tuple *hourly_lead_zero_tuple = dict_find(iterator, MESSAGE_KEY_HOUR_LEAD_ZERO);
   if (hourly_lead_zero_tuple) {
-    hour_lead_zero = hourly_lead_zero_tuple->value->uint8 != 0;
+    hour_lead_zero = hourly_lead_zero_tuple->value->int32 != 0;
     persist_write_bool(KEY_MMS_HOUR_LEAD_ZERO, hour_lead_zero);
     time_t temp = time(NULL);
     struct tm *tick_time = localtime(&temp);
     update_time(tick_time);
   }
-  
+
   Tuple *dnd_tuple = dict_find(iterator, MESSAGE_KEY_DND);
   if (dnd_tuple) {
-    if (dnd_tuple->value->uint8 != 0) {
+    if (dnd_tuple->value->int32 != 0) {
       snprintf(s_config_dnd, sizeof(s_config_dnd), "dnd_on");
     }
     else {
@@ -368,19 +370,19 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
     }
     persist_write_string(KEY_MMS_DND, s_config_dnd);
   }
-  
+
   Tuple *dnd_start_tuple = dict_find(iterator, MESSAGE_KEY_DND_START);
   if (dnd_start_tuple) {
     s_config_dnd_start = (int)dnd_start_tuple->value->int32;
     persist_write_int(KEY_MMS_DND_START, s_config_dnd_start);
   }
-  
+
   Tuple *dnd_end_tuple = dict_find(iterator, MESSAGE_KEY_DND_END);
   if (dnd_end_tuple) {
     s_config_dnd_end = (int)dnd_end_tuple->value->int32;
     persist_write_int(KEY_MMS_DND_END, s_config_dnd_end);
   }
-  
+
   Tuple *humidity_tuple = dict_find(iterator, MESSAGE_KEY_HUMIDITY);
   if (humidity_tuple) {
     s_humidity_buffer = (int)humidity_tuple->value->int32;
@@ -388,14 +390,20 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
     persist_write_int(KEY_MMS_HUMIDITY, s_humidity_buffer);
     update_bottom_info = true;
   }
-  
+
+  APP_LOG(APP_LOG_LEVEL_INFO, "ROB: 1");
   Tuple *show_humidity_tuple = dict_find(iterator, MESSAGE_KEY_SHOW_HUMIDITY);
   if (show_humidity_tuple) {
-    s_config_show_humidity = show_humidity_tuple->value->uint8 != 0;
+    APP_LOG(APP_LOG_LEVEL_INFO, "ROB: 2");
+    s_config_show_humidity = show_humidity_tuple->value->int32 != 0;
+    APP_LOG(APP_LOG_LEVEL_INFO, "ROB: 3");
     persist_write_bool(KEY_MMS_SHOW_HUMIDITY, s_config_show_humidity);
+    APP_LOG(APP_LOG_LEVEL_INFO, "ROB: 4");
     update_bottom_info = true;
   }
-  
+
+  APP_LOG(APP_LOG_LEVEL_INFO, "ROB: 5");
+
   if (update_bottom_info) {
     set_bottom_info();
   }
@@ -405,9 +413,9 @@ static void bluetooth_handler(bool connected) {
   layer_mark_dirty(s_bluetooth_layer);
   if (!connected) {
     // Get a tm structure
-    time_t temp = time(NULL); 
+    time_t temp = time(NULL);
     struct tm *tick_time = localtime(&temp);
-    
+
     if (last_bluetooth_connection != connected && battery_plugged == false && !is_silence(tick_time->tm_hour)) {
       // Vibe pattern: ON for 300ms:
       static const uint32_t segments[] = {300};
@@ -489,7 +497,7 @@ static void set_bottom_info() {
   else {
     snprintf(bufferMiddleStr, sizeof(bufferMiddleStr), " %s ", s_day_of_week_buffer);
   }
-  
+
   #if defined(PBL_ROUND)
     if (strlen(s_temperature_buffer)) {
       text_layer_set_text(s_temperature_layer, s_temperature_buffer);
@@ -517,7 +525,7 @@ static void set_bottom_info() {
       snprintf(date_weather_buffer, sizeof(date_weather_buffer), "%s", s_date_buffer);
     }
   #endif
-  
+
   text_layer_set_text(s_bottom_info_layer, date_weather_buffer);
 }
 
@@ -542,7 +550,7 @@ unsigned int HexStringToUInt(char const *hexstring) {
     }
     ++c;
   }
-  return result;  
+  return result;
 }
 
 static GColor get_main_color() {
@@ -619,15 +627,15 @@ static int16_t get_current_version() {
 
 static void draw_background(Layer *layer, GContext *ctx) {
   GRect bounds = layer_get_bounds(layer);
-  
+
   graphics_context_set_fill_color(ctx, get_background_color());
   graphics_fill_rect(ctx, bounds, 0, GCornerNone);
-  
+
   int line_indent = 4;
   int line_pos_y = 141+LAYER_VERTICAL_INDENT+LAYER_VERTICAL_INDENT/4;
   #if defined(PBL_ROUND)
     GBitmap *fb = graphics_capture_frame_buffer(ctx);
-  
+
     for (int y = line_pos_y-2; y <= line_pos_y-1; y++) {
       // Get the min and max x values for this row
       GBitmapDataRowInfo info = gbitmap_get_data_row_info(fb, y);
@@ -636,7 +644,7 @@ static void draw_background(Layer *layer, GContext *ctx) {
         memset(&info.data[x], get_main_color().argb, 1);
       }
     }
-  
+
     // Release framebuffer
     graphics_release_frame_buffer(ctx, fb);
   #else
@@ -655,7 +663,7 @@ void update_background_color() {
     snprintf(s_config_screen_color, sizeof(s_config_screen_color), "%s", get_random_color());
   }
 }
-  
+
 static void update_weather_image(Layer *layer, GContext *ctx) {
   GRect bounds = layer_get_bounds(layer);
   int horizontal_correction = 0;
@@ -663,14 +671,14 @@ static void update_weather_image(Layer *layer, GContext *ctx) {
   #ifdef PBL_ROUND
   horizontal_correction = 16;
   #endif
-  
+
   if (200 == bounds.size.w) {
     horizontal_correction = 7;
     vertical_correction = 8;
   }
-  
+
   int weather_id = persist_read_int(KEY_MMS_CONDITIONS);
-  
+
   if (weather_id == 1010) {
     // CLEAN_SKY_DAY;
     draw_big_sun(layer, ctx, GPoint(0+horizontal_correction, 0+vertical_correction), get_main_color(), get_main_color_inverted());
@@ -886,10 +894,10 @@ static void outbox_failed_callback(DictionaryIterator *iterator, AppMessageResul
 static void outbox_sent_callback(DictionaryIterator *iterator, void *context) {
   APP_LOG(APP_LOG_LEVEL_INFO, "Outbox send success!");
   weather_out_of_date = false;
-  
+
   update_background_color();
 }
-  
+
 static void init() {
   // Create main Window element and assign to pointer
   s_main_window = window_create();
@@ -902,22 +910,22 @@ static void init() {
 
   // Show the Window on the watch, with animated=true
   window_stack_push(s_main_window, true);
-  
+
   // Register with TickTimerService
   tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
-  
+
   // Subscribe to Bluetooth updates
   bluetooth_connection_service_subscribe(bluetooth_handler);
-  
+
   // Register battery handler
   battery_state_service_subscribe(battery_handler);
-  
+
   // Register callbacks
   app_message_register_inbox_received(inbox_received_callback);
   app_message_register_inbox_dropped(inbox_dropped_callback);
   app_message_register_outbox_failed(outbox_failed_callback);
   app_message_register_outbox_sent(outbox_sent_callback);
-  
+
   // Open AppMessage
   app_message_open(APP_MESSAGE_INBOX_SIZE_MINIMUM, APP_MESSAGE_OUTBOX_SIZE_MINIMUM);
 }

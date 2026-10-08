@@ -1,6 +1,8 @@
 {
     "author": "Igor Traskovetskyi",
-    "dependencies": {},
+    "dependencies": {
+        "pebble-clay": "^1.0.1"
+    },
     "keywords": [],
     "name": "mmsmile",
     "pebble": {
@@ -11,18 +13,35 @@
         "displayName": "Make Me Smile",
         "enableMultiJS": true,
         "messageKeys": [
-            "TEMPERATURE",
-            "CONDITIONS",
+            "temperature_scale",
+            "bluetooth",
+            "battery",
+            "hourly_beep",
+            "dnd",
+            "dnd_start",
+            "dnd_end",
+            "hour_lead_zero",
+            "day_of_week_humidity",
+            "openweathermap_api_key",
+            "server",
+            "background_auto",
+            "background_color",
+
+
             "BLUETOOTH",
             "BATTERY",
-            "HOURLY_BEEP",
             "SCREEN_COLOR",
+            "HOURLY_BEEP",
             "DND",
+            "HOUR_LEAD_ZERO",
+            "SHOW_HUMIDITY",
             "DND_START",
             "DND_END",
-            "HOUR_LEAD_ZERO",
-            "HUMIDITY",
-            "SHOW_HUMIDITY"
+
+
+            "TEMPERATURE",
+            "CONDITIONS",
+            "HUMIDITY"
         ],
         "projectType": "native",
         "resources": {
@@ -49,5 +68,5 @@
             "watchface": true
         }
     },
-    "version": "3.0.0"
+    "version": "3.1.0"
 }
